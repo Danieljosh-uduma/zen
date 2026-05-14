@@ -17,6 +17,16 @@ type DefaultPanicHandler struct{}
 // Handle handles the panic and returns an error.
 func (h *DefaultPanicHandler) Handle(c *Context, info *PanicInfo) {
 
+	if info.Severity == PanicSeverityCritical &&
+		c.app.panicPolicy.FailOnCritical {
+
+		c.LogError("Critical panic escalation triggered", logger.Fields{
+			"panic": info.Value,
+		})
+
+		panic(info.Value)
+	}
+
 	fields := logger.Fields{
 		"path":      info.Path,
 		"method":    info.Method,

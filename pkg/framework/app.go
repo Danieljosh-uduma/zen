@@ -39,6 +39,7 @@ type App struct {
 
 	RecoveryConfig RecoveryConfig
 	panicHandler   PanicHandler
+	panicPolicy    PanicPolicy
 }
 
 func New() *App {
@@ -55,6 +56,9 @@ func New() *App {
 		RecoveryConfig: RecoveryConfig{
 			ExposeError:  false,
 			IncludeStack: false,
+		},
+		panicPolicy: PanicPolicy{
+			FailOnCritical: false,
 		},
 	}
 
@@ -133,6 +137,26 @@ func (a *App) SetPanicHandler(handler PanicHandler) {
 	}
 
 	a.panicHandler = handler
+}
+
+// SetPanicPolicy sets the panic policy for the application.
+//
+// Note:
+// If a custom panic policy is not set, the default panic policy [PanicPolicy] is being used
+func (a *App) SetPanicPolicy(policy PanicPolicy) {
+	a.panicPolicy = policy
+}
+
+// EnableFailFastPanics sets the panic policy to fail fast on critical panics.
+// This means that if a critical panic occurs, the application will panic and shutdown instead of handling it.
+func (a *App) EnableFailFastPanics() {
+	a.panicPolicy.FailOnCritical = true
+}
+
+// DisableFailFastPanics sets the panic policy to not fail fast on critical panics.
+// This means that if a critical panic occurs, the application will handle it instead of panicking and shutting down.
+func (a *App) DisableFailFastPanics() {
+	a.panicPolicy.FailOnCritical = false
 }
 
 func (a *App) SetLogger(l logger.Logger) {
